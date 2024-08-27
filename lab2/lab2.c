@@ -35,10 +35,9 @@ int main(void)
         printf("O coelho pode escapar pelo buraco (%.3f,%.3f).\n", x, y);
         escapou = 1;
         continue;
-      }
-
-      if (i == n)
-        printf("O coelho nao pode escapar.\n");
+      } 
     }
+    if (escapou == 0)
+        printf("O coelho nao pode escapar.\n");
   }
 }
