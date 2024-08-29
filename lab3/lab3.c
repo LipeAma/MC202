@@ -15,7 +15,7 @@ int main(void) {
     int S[n];   // Input
     int M[r];   // Maior elemento de cada uma das r fatias utilizadas no truque
 
-    // Leitura o array inicial e calcula os maximos de cada fatia
+    // Leitura do array inicial e calcula os maximos de cada fatia
     for (int i = 0; i < n; i++) {
         scanf("%d", &S[i]);
         if (i % r == 0 || S[i] > M[i / r])
@@ -32,11 +32,13 @@ int main(void) {
             temp1 = a / r;
             temp2 = S[a];
             S[a] = b;
-            if (M[temp1] < b)
+	    // Testa se o número substituido era o maior daquela fatia,
+	    // se for, calcula novamente o maximo da fatia
+            if (M[temp1] <= b)
                 M[temp1] = b;
             else if (M[temp1] == temp2) {
                 temp2 = a - a % r + r;
-                M[temp1] = b;
+                M[temp1] = 0;
                 for (int i = a - a % r; i < temp2 && i < n; i++) {
                     if (M[temp1] < S[i]) M[temp1] = S[i];
                 }
@@ -49,7 +51,7 @@ int main(void) {
                 if (i % r == 0 && i + r - 1 <= b) {
                     if (max < M[i / r])
                         max = M[i / r];
-                    i += r;
+                    i = (i/r+1)*r-1;
                     continue;
                 }
 
