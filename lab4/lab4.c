@@ -1,20 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char* extendString(long n, char String[n]) {
-	long size = n * sizeof(char);
-	char* pNewString = (char*) malloc(size*2);
-	for (int i = 0; i < n; i++) {
-		pNewString[i] = String[i];
-	}
-	return pNewString;
-}
-
 int main(void) {
-	char frase[11] = "1234567890";
-	printf("frase:%s | size=%ld\n", frase, sizeof(frase));
-	char* fraseGrande = extendString(11, frase);
-	printf("frase:%s | size=%ld\n", frase, sizeof(frase));
-	printf("frase:%s | size=%ld\n", fraseGrande, sizeof(fraseGrande));
+  long str_size = sizeof(char[2e5]); // A linha não excede 2e5 caracteres
+  char *str = (char*) malloc(str_size);
+  str[0] = '\0'
 
+  char c;
+  int linesum = 0 // O tipo é int pois irá armazenar no máximo o valor (2e5 / 6) * 9 = 3e5 
+  while ((c = getchar()) != EOF) {
+    if ('0' <= c <= '9') {
+      linesum += c - '0'
+    }
+    else if (c == ' ')
+    
+    if c == '\n'
+      print
+    }   
+  }
 }
