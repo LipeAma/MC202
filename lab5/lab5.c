@@ -9,7 +9,7 @@ int main(void) {
   scanf("%d", &ordem);
   int n_elementos = ((1+ordem)*ordem)/2;
 
-  double** matriz = (double**)malloc(sizeof(double**) * ordem);
+  double** matriz = (double**)malloc(sizeof(double*) * ordem);
   for (int i = 0; i<ordem; i++) {
     matriz[i] = (double*)malloc(sizeof(double)*(i+1));
     for (int j = 0; j <= i; j++) {
