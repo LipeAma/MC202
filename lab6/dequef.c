@@ -1,11 +1,9 @@
-// #include <cstddef>
-// #include <errno.h>
 #include "dequef.h"
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 /*
 Cria um deque de floats.
 
@@ -17,7 +15,7 @@ Sucesso -> dequef*
 Fracasso -> NULL
  */
 dequef *df_alloc(long capacity, double resizeFactor) {
-  if (capacity < 1 || resizeFactor <= 1)
+  if (capacity < 1 || resizeFactor <= 1 || capacity * sizeof(float) > 32000000)
     return NULL;
 
   dequef *deque = malloc(sizeof(dequef));
@@ -30,8 +28,9 @@ dequef *df_alloc(long capacity, double resizeFactor) {
   deque->cap = capacity;
   deque->factor = resizeFactor;
 
-  deque->data = calloc(capacity, sizeof(float));
+  deque->data = malloc(capacity * sizeof(float));
   if (deque->data == NULL) {
+    printf("eita");
     free(deque);
     return NULL;
   }
@@ -64,11 +63,9 @@ int df_upscale(dequef *deque) {
 
     long novaCapacidade = deque->cap * deque->factor;
     if (novaCapacidade == deque->cap)
-      novaCapacidade++;
+      return 0;
 
     float *arrayFloat = realloc(deque->data, novaCapacidade * sizeof(float));
-    if (arrayFloat == NULL)
-      return 0;
 
     /*
     Ao aumentar o vetor, é necessário mover para o fim do vetor grande os
@@ -109,7 +106,7 @@ int df_downscale(dequef *deque) {
 
     long novaCapacidade = deque->cap / deque->factor;
     if (novaCapacidade == deque->cap)
-      novaCapacidade -= 1;
+      return 0;
     if (novaCapacidade < deque->mincap)
       novaCapacidade = deque->mincap;
 
@@ -256,14 +253,15 @@ Falha -> 0
 **/
 float df_get(dequef *deque, long posicao) {
 
-  if (posicao < 0 || posicao >= deque->size)
+  if (posicao < 0 || posicao >= deque->size) {
+    errno = 33;
     return 0.0f;
-
-  long getPosition = deque->first + posicao;
-  if (getPosition >= deque->cap)
-    getPosition -= deque->cap;
-
-  return deque->data[getPosition];
+  } else {
+    long getPosition = deque->first + posicao;
+    if (getPosition >= deque->cap)
+      getPosition -= deque->cap;
+    return deque->data[getPosition];
+  }
 }
 
 /**
@@ -275,6 +273,8 @@ void df_set(dequef *deque, long posicao, float valor) {
     if (setPosition >= deque->cap)
       setPosition -= deque->cap;
     deque->data[setPosition] = valor;
+  } else {
+    errno = 33;
   }
 }
 
@@ -282,35 +282,43 @@ void df_set(dequef *deque, long posicao, float valor) {
 Imprime os elementos do deque.
 **/
 void df_print(dequef *deque) {
-  printf("deque (%ld):", deque->size);
-  for (long i = deque->first; i < deque->first + deque->size; i++) {
-    if (i >= deque->cap)
-      printf(" %.1f", deque->data[i - deque->cap]);
-    else
-      printf(" %.1f", deque->data[i]);
+  if (deque == NULL) {
+    errno = 22;
+  } else {
+    printf("deque (%ld):", deque->size);
+    for (long i = deque->first; i < deque->first + deque->size; i++) {
+      if (i >= deque->cap)
+        printf(" %.1f", deque->data[i - deque->cap]);
+      else
+        printf(" %.1f", deque->data[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
 }
 
 /**
 Imprime o array, incluido valores vazios.
 **/
 void df_printArray(dequef *deque) {
-  printf("deque (%ld):", deque->size);
-  long blanksBeforeFirst = deque->first;
-  if (deque->first + deque->size >= deque->cap) {
-    long numOfElements = deque->first + deque->size - deque->cap;
-    blanksBeforeFirst -= numOfElements;
-    for (int i = 0; i < numOfElements; i++)
-      printf(" %.1f", deque->data[i]);
-  }
-  for (int i = 0; i < blanksBeforeFirst; i++)
-    printf(" _");
-  for (int i = deque->first; i < deque->cap; i++) {
-    if (i >= deque->first + deque->size)
+  if (deque == NULL) {
+    errno = 22;
+  } else {
+    printf("deque (%ld):", deque->size);
+    long blanksBeforeFirst = deque->first;
+    if (deque->first + deque->size >= deque->cap) {
+      long numOfElements = deque->first + deque->size - deque->cap;
+      blanksBeforeFirst -= numOfElements;
+      for (int i = 0; i < numOfElements; i++)
+        printf(" %.1f", deque->data[i]);
+    }
+    for (int i = 0; i < blanksBeforeFirst; i++)
       printf(" _");
-    else
-      printf(" %.1f", deque->data[i]);
+    for (int i = deque->first; i < deque->cap; i++) {
+      if (i >= deque->first + deque->size)
+        printf(" _");
+      else
+        printf(" %.1f", deque->data[i]);
+    }
+    printf("\n");
   }
-  printf("\n");
 }
