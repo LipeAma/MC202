@@ -96,7 +96,7 @@ int df_upscale(dequef *deque) {
 
 /**
 Diminui um deque de acordo com seu fator de redimensionamento, apenas se
-necessário. Caso de falhe, pode alterar o deque.
+necessário. Caso de falhe, não altera o deque.
 
 Sucesso -> 1
 Falha -> 0
@@ -110,45 +110,26 @@ int df_downscale(dequef *deque) {
     if (novaCapacidade < deque->mincap)
       novaCapacidade = deque->mincap;
 
-    /*
-    Ao diminuir o vetor, é preciso que todos os valores estejam na região que se
-    manterá para que não haja perdas, por exemplo:
+    float *aux = malloc(novaCapacidade * sizeof(float));
 
-    Caso 1 - Há espaços vazios entre os valores.
-    Antes:                      c d e _ _ _ _ _ _ _ _ a b
-    Se diminuisse sem arrumar:  c d e _ _ _ _ _
-    Arrumado:                   c d e _ _ _ a b _ _ _ _ _
-    Logo após diminuição:       c d e _ _ _ a b
-
-    Caso 2 - Não há espaços vazios entre os valores.
-    Antes:                      _ _ _ _ a b c d e _ _ _ _
-    Se diminuisse sem arrumar:  _ _ _ _ a b c d
-    Arrumado:                   a b c d e _ _ _ _ _ _ _ _
-    Logo após diminuição:       a b c d e _ _ _
-
-    O código abaixo encarrega-se disso.
-    */
-    if (deque->first + deque->size >= deque->cap) {
-      for (long i = 1; i <= deque->cap - deque->first; i++) {
-        deque->data[novaCapacidade - i] = deque->data[deque->cap - i];
-      }
-      deque->first += novaCapacidade - deque->cap;
-    } else if (deque->first + deque->size > novaCapacidade) {
-      for (long i = 0; i < deque->size; i++)
-        deque->data[i] = deque->data[deque->first + i];
-      deque->first = 0;
-    }
-
-    float *arrayFloat = realloc(deque->data, novaCapacidade * sizeof(float));
-    if (arrayFloat == NULL)
+    if (aux == NULL)
       return 0;
 
-    deque->data = arrayFloat;
+    long pos;
+    for (long i = 0; i < deque->size; i++) {
+      pos = deque->first + i;
+      if (pos >= deque->cap)
+        pos -= deque->cap;
+      aux[i] = deque->data[pos];
+    }
+
+    free(deque->data);
+    deque->data = aux;
     deque->cap = novaCapacidade;
+    deque->first = 0;
   }
   return 1;
 }
-
 /**
 Adiciona um valor no final do deque. Aumenta a capacidade do deque se necessário
 e possível.
