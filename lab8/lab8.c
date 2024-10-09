@@ -1,155 +1,330 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// -------------------------- Declarações ----------------------------------
-
-typedef struct Element {
-  struct Element *next;
-  long val; // Não foi especificado os limites
-} Element;
-
 typedef struct Set {
-  struct Element *dummyInicio;
-  unsigned long name;   // Não foi esoecificado o limite superior
-  unsigned long length; // Não foi especificado o limite superior
-  struct Set *next;
-  struct Set *previous;
+  struct Element *firstDummy;
+  struct Element *lastDummy;
 } Set;
 
-typedef struct ListOfSets {
-  struct Set *dummy;
-  unsigned char length; // é no maximo 127
-} ListOfSets;
+typedef union Val {
+  int num;
+  struct {
+    int name;
+    Set *pointer;
+  } set;
+} Val;
 
-int setCreate(ListOfSets *);
-int setInsertMultiple(ListOfSets *);
-int setRemove(ListOfSets *);
-int setUnion(ListOfSets *);
-int setIntersect(ListOfSets *);
-int setComplement(ListOfSets *);
-int setContains(ListOfSets *);
-int setPrint(ListOfSets *);
-int setTerminate(ListOfSets *);
+typedef struct Element {
+  Val val;
+  struct Element *next;
+  struct Element *prev;
+} Element;
 
-// ---------------------------- Definições ----------------------------------
-
-int main(void) {
-  int returnVal;
-  char command;
-  ListOfSets *list = (ListOfSets *)malloc(sizeof(ListOfSets));
-  list->length = 0;
-  list->dummy = (Set *)calloc(1, sizeof(Set));
-
-  while (scanf("%c", &command) != EOF) {
-    switch (command) {
-    case 'c':
-      returnVal = setCreate(list);
-      break;
-    case 'i':
-      returnVal = setInsertMultiple(list);
-      break;
-    case 'r':
-      returnVal = setRemove(list);
-      break;
-    case 'u':
-      returnVal = setUnion(list);
-      break;
-    case 'n':
-      returnVal = setIntersect(list);
-      break;
-    case 'm':
-      returnVal = setComplement(list);
-      break;
-    case 'e':
-      returnVal = setContains(list);
-      break;
-    case 'p':
-      returnVal = setPrint(list);
-      break;
-    case 't':
-      returnVal = setTerminate(list);
-      break;
-    }
+Set *newSet(void) {
+  Set *set = (Set *)malloc(sizeof(Set));
+  if (set == NULL)
+    return NULL;
+  set->firstDummy = (Element *)calloc(1, sizeof(Element));
+  if (set->firstDummy == NULL) {
+    free(set);
+    return NULL;
   }
-  return 0;
+  set->lastDummy = (Element *)calloc(1, sizeof(Element));
+  if (set->lastDummy == NULL) {
+    free(set->firstDummy);
+    free(set);
+    return NULL;
+  }
+  set->firstDummy->next = set->lastDummy;
+  set->lastDummy->prev = set->firstDummy;
+  return set;
 }
 
 void freeSet(Set *set) {
-  Element *aux;
-  while (set->dummyInicio != NULL) {
-    aux = set->dummyInicio;
-    set->dummyInicio = aux->next;
-    free(aux);
+  Element *element = set->firstDummy;
+  while (element->next != NULL) {
+    element = element->next;
+    free(element->prev);
   }
+  free(element);
   free(set);
+  return;
 }
-Set *getSet(ListOfSets *list, unsigned long setName) {
-  Set *set = list->dummy;
-  for (; set != NULL && set->name != setName; set = set->next) {
+
+int containsVal(int val, Set *set) {
+  int retVal = 0;
+  for (Element *element = set->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    if (element->val.num == val) {
+      retVal = 1;
+      break;
+    }
   }
-  return set;
+  return retVal;
 }
-void setInsertOne(Set *set, long val) {
-  for (Element *current = set->dummyInicio->next; current != NULL;
-       current = current->next) {
-    if (current->val == val)
+
+void insertVal(int val, Set *set) {
+  for (Element *element = set->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    if (element->val.num == val)
       return;
   }
-  Element *new = (Element *)malloc(sizeof(Element));
-  new->val = val;
-  new->next = set->dummyInicio->next;
-  set->dummyInicio->next = new;
+
+  Element *element = (Element *)malloc(sizeof(Element));
+  if (element == NULL)
+    return;
+
+  Element *aux = set->firstDummy->next;
+  while (aux->next != NULL) {
+    if (aux->val.num > val)
+      break;
+    aux = aux->next;
+  }
+  element->val.num = val;
+  element->next = aux;
+  element->prev = aux->prev;
+  element->prev->next = element;
+  element->next->prev = element;
+  return;
 }
 
-// implementar error handling em tudo
-int setCreate(ListOfSets *list) {
-  // Scaneia o nome do set que será criado.
-  unsigned long setName;
-  if (scanf(" %lu", &setName) != 1)
-    return 1;
+void removeVal(int val, Set *set) {
+  for (Element *element = set->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    if (element->val.num == val) {
+      element->prev->next = element->next;
+      element->next->prev = element->prev;
+      free(element);
+    }
+  }
+  return;
+}
 
-  // Anda pela lista para verificar se existe um set com esse nome.
-  // Se existir, ele será deletado.
-  Set *set = getSet(list, setName);
-  if (set != NULL) {
-    set->previous->next = set->next;
-    freeSet(set);
+Set *actionC(Set *setOfSets, int newSetName) {
+  if (newSetName == -1)
+    scanf("%d", &newSetName);
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == newSetName) {
+      freeSet(set->val.set.pointer);
+      set->val.set.pointer = newSet();
+      return set->val.set.pointer;
+    }
+  }
+  Element *set = malloc(sizeof(Element));
+  set->val.set.name = newSetName;
+  set->val.set.pointer = newSet();
+  set->next = setOfSets->lastDummy;
+  set->prev = set->next->prev;
+  set->prev->next = set;
+  set->next->prev = set;
+  return set->val.set.pointer;
+}
+
+void actionI(Set *setOfSets) {
+  int setName;
+  int num;
+  scanf("%d", &setName);
+  int len;
+  scanf("%d", &len);
+
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == setName) {
+      for (int i = 1; i <= len; i++) {
+        scanf("%d", &num);
+        insertVal(num, set->val.set.pointer);
+      }
+      break;
+    }
+  }
+  return;
+}
+
+void actionR(Set *setOfSets) {
+  int setName;
+  int num;
+  scanf("%d", &setName);
+  int len;
+  scanf("%d", &len);
+
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == setName) {
+      for (int i = 1; i <= len; i++) {
+        scanf("%d", &num);
+        removeVal(num, set->val.set.pointer);
+      }
+      break;
+    }
+  }
+  return;
+}
+
+void actionU(Set *setOfSets) {
+  int nameA, nameB, nameC;
+  scanf("%d %d %d", &nameA, &nameB, &nameC);
+
+  Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == nameB)
+      B = set->val.set.pointer;
+    if (set->val.set.name == nameC)
+      C = set->val.set.pointer;
+    if (B && C)
+      break;
   }
 
-  // Cria o novo set e adiciona na lista.
-  Set *new = (Set *)malloc(sizeof(Set));
-  new->dummyInicio = calloc(1, sizeof(Element));
-  new->length = 0;
-  new->name = setName;
-  new->previous = list->dummy;
-  new->next = list->dummy->next;
-  list->dummy->next = new;
-  if (new->next != NULL)
-    new->next->previous = new;
-  return 0;
-}
-// implementar error handling
-int setInsertMultiple(ListOfSets *list) {
-  // Scaneia o nome do set no qual será inserido.
-  unsigned long setName;
-  if (scanf(" %lu", &setName) != 1)
-    return 1;
-  Set *set = getSet(list, setName);
-  if (set == NULL)
-    return 0;
-
-  char linebreak;
-  long val;
-  while (scanf("%c", &linebreak) && linebreak != '\n') {
-    scanf("%ld", &val);
-    setInsertOne(set, val);
+  for (Element *element = B->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    insertVal(element->val.num, A);
   }
-  return 0;
+
+  for (Element *element = C->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    insertVal(element->val.num, A);
+  }
+  return;
 }
 
-int setRemove(ListOfSets *list) { return 0; }
-int setUnion(ListOfSets *list) { return 0; }
-int setIntersect(ListOfSets *list) { return 0; }
-int setComplement(ListOfSets *list) { return 0; }
-int setContains(ListOfSets *list) { return 0; }
-int setPrint(ListOfSets *list) { return 0; }
+void actionN(Set *setOfSets) {
+  int nameA, nameB, nameC;
+  scanf("%d %d %d", &nameA, &nameB, &nameC);
+
+  Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == nameB)
+      B = set->val.set.pointer;
+    if (set->val.set.name == nameC)
+      C = set->val.set.pointer;
+    if (B && C)
+      break;
+  }
+
+  for (Element *element = B->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    if (containsVal(element->val.num, C))
+      insertVal(element->val.num, A);
+  }
+  return;
+}
+
+void actionM(Set *setOfSets) {
+  int nameA, nameB, nameC;
+  scanf("%d %d %d", &nameA, &nameB, &nameC);
+
+  Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == nameB)
+      B = set->val.set.pointer;
+    if (set->val.set.name == nameC)
+      C = set->val.set.pointer;
+    if (B && C)
+      break;
+  }
+
+  for (Element *element = B->firstDummy->next; element->next != NULL;
+       element = element->next) {
+    if (!containsVal(element->val.num, C))
+      insertVal(element->val.num, A);
+  }
+  return;
+}
+
+void actionE(Set *setOfSets) {
+  int setName;
+  int num;
+  scanf("%d %d", &setName, &num);
+
+  Set *A = NULL;
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == setName) {
+      A = set->val.set.pointer;
+      break;
+    }
+  }
+  if (A == NULL) {
+    A = actionC(setOfSets, -1);
+  }
+  if (containsVal(num, A))
+    printf("%d esta em C%d\n", num, setName);
+  else
+    printf("%d nao esta em C%d\n", num, setName);
+  return;
+}
+
+void actionP(Set *setOfSets) {
+  int setName;
+  scanf("%d", &setName);
+
+  Set *A = NULL;
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next) {
+    if (set->val.set.name == setName) {
+      A = set->val.set.pointer;
+      break;
+    }
+  }
+
+  if (A == NULL) {
+    A = actionC(setOfSets, -1);
+  }
+  printf("C%d = {", setName);
+  Element *element = A->firstDummy->next;
+  while (element->next != NULL) {
+    printf("%d", element->val.num);
+    element = element->next;
+    if (element->next != NULL)
+      printf(", ");
+  }
+  printf("}\n");
+}
+
+void actionT(Set *setOfSets) {
+  for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
+       set = set->next)
+    freeSet(set->val.set.pointer);
+  free(setOfSets);
+}
+
+int main(void) {
+  Set *setOfSets = newSet();
+  char action;
+  while (scanf("%c", &action) != EOF) {
+    switch (action) {
+    case 'c':
+      actionC(setOfSets, -1);
+      break;
+    case 'i':
+      actionI(setOfSets);
+      break;
+    case 'r':
+      actionR(setOfSets);
+      break;
+    case 'u':
+      actionU(setOfSets);
+      break;
+    case 'n':
+      actionN(setOfSets);
+      break;
+    case 'm':
+      actionM(setOfSets);
+      break;
+    case 'e':
+      actionE(setOfSets);
+      break;
+    case 'p':
+      actionP(setOfSets);
+      break;
+    case 't':
+      actionT(setOfSets);
+      break;
+    default:
+      break;
+    }
+  }
+}
