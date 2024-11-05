@@ -11,14 +11,10 @@ typedef struct Tup {
 int sort(const void *arg1, const void *arg2) {
   Tup tup1 = *(Tup *)arg1;
   Tup tup2 = *(Tup *)arg2;
-  if (tup1.i > tup2.i)
-    return 1;
-  if (tup1.i < tup2.i)
-    return -1;
-  if (tup1.j > tup2.j)
-    return 1;
-  if (tup1.j < tup2.j)
-    return -1;
+  if (tup1.i > tup2.i) return 1;
+  if (tup1.i < tup2.i) return -1;
+  if (tup1.j > tup2.j) return 1;
+  if (tup1.j < tup2.j) return -1;
   return 0;
 }
 
@@ -45,21 +41,18 @@ int main(void) {
     }
   }
   free(coord);
-  while (aux <= m)
-    indexes[aux] = nnz;
+  while (aux <= m) indexes[aux] = nnz;
 
   unsigned int i, j;
   while (1) {
     scanf("%d %d", &i, &j);
-    if (i == -1 && j == -1)
-      break;
+    if (i == -1 && j == -1) break;
     printf("(%d,%d) = ", i, j);
     if (indexes[i] == indexes[i + 1])
       printf("0\n");
     else {
       i = indexes[i];
-      while (columns[i] != j)
-        i+= 1;
+      while (columns[i] != j) i += 1;
       printf("%d\n", values[i]);
     }
   }

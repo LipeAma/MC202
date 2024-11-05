@@ -76,8 +76,7 @@ void listInsert(List *list, unsigned key) {
   Node *new = malloc(sizeof(Node));
   new->val = key;
   new->count = 0;
-  if (list->headDummy == list->beforeTailDummy)
-    list->beforeTailDummy = new;
+  if (list->headDummy == list->beforeTailDummy) list->beforeTailDummy = new;
   new->next = list->headDummy->next;
   list->headDummy->next = new;
 }
@@ -107,8 +106,7 @@ unsigned mtfSearch(List *list, unsigned key) {
     if (current->val == key) {
       current->count++;
       if (previous != NULL) {
-        if (current == list->beforeTailDummy)
-          list->beforeTailDummy = previous;
+        if (current == list->beforeTailDummy) list->beforeTailDummy = previous;
         previous->next = current->next;
         current->next = list->headDummy->next;
         list->headDummy->next = current;
@@ -126,8 +124,7 @@ unsigned transposeSearch(List *list, unsigned key) {
   Node *current = list->headDummy->next;
   unsigned comparisons = 0;
 
-  if (current->next == NULL)
-    return comparisons;
+  if (current->next == NULL) return comparisons;
   comparisons++;
   if (current->val == key) {
     current->count++;
@@ -136,16 +133,14 @@ unsigned transposeSearch(List *list, unsigned key) {
   Node *previous = current;
   current = current->next;
 
-  if (current->next == NULL)
-    return comparisons;
+  if (current->next == NULL) return comparisons;
   comparisons++;
   if (current->val == key) {
     current->count++;
     list->headDummy->next = current;
     previous->next = current->next;
     current->next = previous;
-    if (current == list->beforeTailDummy)
-      list->beforeTailDummy = previous;
+    if (current == list->beforeTailDummy) list->beforeTailDummy = previous;
     return comparisons;
   }
   Node *previousPrevious = previous;
@@ -159,8 +154,7 @@ unsigned transposeSearch(List *list, unsigned key) {
       previousPrevious->next = current;
       previous->next = current->next;
       current->next = previous;
-      if (current == list->beforeTailDummy)
-        list->beforeTailDummy = previous;
+      if (current == list->beforeTailDummy) list->beforeTailDummy = previous;
       return comparisons;
     }
     previousPrevious = previous;
@@ -182,8 +176,7 @@ unsigned countSearch(List *list, unsigned key) {
       Node *foundNode = current;
       foundNode->count++;
       previous->next = foundNode->next;
-      if (foundNode == list->beforeTailDummy)
-        list->beforeTailDummy = previous;
+      if (foundNode == list->beforeTailDummy) list->beforeTailDummy = previous;
 
       current = list->headDummy->next;
       previous = list->headDummy;
@@ -193,8 +186,7 @@ unsigned countSearch(List *list, unsigned key) {
       }
       foundNode->next = current;
       previous->next = foundNode;
-      if (previous == list->beforeTailDummy)
-        list->beforeTailDummy = foundNode;
+      if (previous == list->beforeTailDummy) list->beforeTailDummy = foundNode;
       return comparisons;
     }
     previous = current;
@@ -210,8 +202,7 @@ unsigned countSearch(List *list, unsigned key) {
     if (current->count == 0) {
       new->next = current;
       previous->next = new;
-      if (previous == list->beforeTailDummy)
-        list->beforeTailDummy = new;
+      if (previous == list->beforeTailDummy) list->beforeTailDummy = new;
       return comparisons;
     }
     previous = current;
@@ -226,78 +217,69 @@ void replForTests(void) {
   unsigned n;
   while (scanf("%c", &command) != EOF) {
     switch (command) {
-    case 'n':
-      if (list != NULL)
+      case 'n':
+        if (list != NULL) break;
+        printf("Numero : ");
+        scanf("%u", &n);
+        list = newList(n);
+        printList(list);
         break;
-      printf("Numero : ");
-      scanf("%u", &n);
-      list = newList(n);
-      printList(list);
-      break;
-    case 'f':
-      if (list == NULL)
+      case 'f':
+        if (list == NULL) break;
+        freeList(list);
+        list = NULL;
+        printf("list free\n");
         break;
-      freeList(list);
-      list = NULL;
-      printf("list free\n");
-      break;
-    case 'a':
-      if (list == NULL)
+      case 'a':
+        if (list == NULL) break;
+        printf("Numero : ");
+        scanf("%u", &n);
+        listAppend(list, n);
+        printList(list);
         break;
-      printf("Numero : ");
-      scanf("%u", &n);
-      listAppend(list, n);
-      printList(list);
-      break;
-    case 'i':
-      if (list == NULL)
+      case 'i':
+        if (list == NULL) break;
+        printf("Numero : ");
+        scanf("%u", &n);
+        listInsert(list, n);
+        printList(list);
         break;
-      printf("Numero : ");
-      scanf("%u", &n);
-      listInsert(list, n);
-      printList(list);
-      break;
-    case 'p':
-      if (list == NULL)
+      case 'p':
+        if (list == NULL) break;
+        printList(list);
         break;
-      printList(list);
-      break;
-    case 's':
-      if (list == NULL)
+      case 's':
+        if (list == NULL) break;
+        printf("Sequential: ");
+        scanf("%u", &n);
+        n = sequencialSearch(list, n);
+        printf("Result=%u\n", n);
+        printList(list);
         break;
-      printf("Sequential: ");
-      scanf("%u", &n);
-      n = sequencialSearch(list, n);
-      printf("Result=%u\n", n);
-      printList(list);
-      break;
-    case 'm':
-      if (list == NULL)
+      case 'm':
+        if (list == NULL) break;
+        printf("MTF: ");
+        scanf("%u", &n);
+        n = mtfSearch(list, n);
+        printf("Result=%u\n", n);
+        printList(list);
         break;
-      printf("MTF: ");
-      scanf("%u", &n);
-      n = mtfSearch(list, n);
-      printf("Result=%u\n", n);
-      printList(list);
-      break;
-    case 't':
-      if (list == NULL)
+      case 't':
+        if (list == NULL) break;
+        printf("Transpose: ");
+        scanf("%u", &n);
+        n = transposeSearch(list, n);
+        printf("Result=%u\n", n);
+        printList(list);
         break;
-      printf("Transpose: ");
-      scanf("%u", &n);
-      n = transposeSearch(list, n);
-      printf("Result=%u\n", n);
-      printList(list);
-      break;
-    case 'c':
-      if (list == NULL)
+      case 'c':
+        if (list == NULL) break;
+        printf("Count: ");
+        scanf("%u", &n);
+        n = countSearch(list, n);
+        printf("Result=%u\n", n);
+        printList(list);
         break;
-      printf("Count: ");
-      scanf("%u", &n);
-      n = countSearch(list, n);
-      printf("Result=%u\n", n);
-      printList(list);
-      break;
     }
   }
 }

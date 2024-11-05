@@ -19,15 +19,15 @@ int inputCases(char, char);
 int main(void) {
   // Resumo:
   // Resolve o problema enunciado utilizando dois arrays. Os caracteres são
-  // lidos, processados para eliminar os irrelevantes, e armazenados no primeiro
-  // array, que vai enchendo aos poucos. Os valores já armazenados não são
-  // processados, apenas a entrada é. Os digitos lidos são armazenados no
-  // segundo array. Quando os digitos do número acabam, o array é inerpretado
-  // como um int, o valor obtido é somado ao total, e o array é reinicializado.
-  // Quando acaba a linha do input, o primeiro array é imprimido, prefixiado
-  // pelo total somado e pela string "goat says:". Após isso os dois arrays são
-  // reinicializados, e o total da soma é zerado.
-  // A leitura é feita charactere por charactere, que são classificados em casos
+  // lidos, processados para eliminar os irrelevantes, e armazenados no
+  // primeiro array, que vai enchendo aos poucos. Os valores já armazenados
+  // não são processados, apenas a entrada é. Os digitos lidos são armazenados
+  // no segundo array. Quando os digitos do número acabam, o array é
+  // inerpretado como um int, o valor obtido é somado ao total, e o array é
+  // reinicializado. Quando acaba a linha do input, o primeiro array é
+  // imprimido, prefixiado pelo total somado e pela string "goat says:". Após
+  // isso os dois arrays são reinicializados, e o total da soma é zerado. A
+  // leitura é feita charactere por charactere, que são classificados em casos
   // definidos na função inputCases.
   //
   // As variáveis estão bem nomeadas, então leia o código para mais detalhes.
@@ -45,64 +45,61 @@ int main(void) {
     }
 
     switch (inputCases(inputChar, wordSize == 0)) {
-    case IS_FIRST_CONSONANT:
-      wordFirstLetter = inputChar;
-      wordSize += 1;
-      lastWas = IS_LETTER;
-      textStr[textPos++] = ' ';
-      break;
-
-    case IS_FIRST_VOWEL:
-      textStr[textPos++] = ' ';
-
-    // Não há break no caso anterior, pois ambos os casos tem código
-    // semelhante que será reutilizado.
-    case IS_LETTER:
-      textStr[textPos++] = inputChar;
-      textStr[textPos] = '\0';
-      wordSize += 1;
-      lastWas = IS_LETTER;
-      break;
-
-    case IS_NUMBER:
-      numStr[numPos++] = inputChar;
-      numStr[numPos] = '\0';
-      lastWas = IS_NUMBER;
-      break;
-
-    case IS_LINEBREAK:
-      if (lastWas == IS_SPACE)
+      case IS_FIRST_CONSONANT:
+        wordFirstLetter = inputChar;
+        wordSize += 1;
+        lastWas = IS_LETTER;
+        textStr[textPos++] = ' ';
         break;
-      lastWas = IS_LINEBREAK;
 
-    // Não há break no caso anterior, pois ambos os casos tem código
-    // semelhante que será reutilizado.
-    case IS_SPACE:
-      if (wordFirstLetter != IS_SPACE)
-        textStr[textPos++] = wordFirstLetter;
-      wordFirstLetter = IS_SPACE;
+      case IS_FIRST_VOWEL:
+        textStr[textPos++] = ' ';
 
-      if (wordSize) {
-        textStr[textPos++] = 'm';
-        for (char i = 0; i <= wordSize; i++)
-          textStr[textPos++] = 'a';
+      // Não há break no caso anterior, pois ambos os casos tem código
+      // semelhante que será reutilizado.
+      case IS_LETTER:
+        textStr[textPos++] = inputChar;
         textStr[textPos] = '\0';
-      }
-      if (lastWas == IS_LINEBREAK) {
-        if (lineSum == 1)
-          printf("1 goat says:%s\n", textStr);
-        else
-          printf("%d goats say:%s\n", lineSum, textStr);
-        textPos = 0, numPos = 0, lineSum = 0;
-        textStr[0] = '\0', numStr[0] = '\0';
-      }
-      wordSize = 0;
-      lastWas = IS_SPACE;
-      break;
+        wordSize += 1;
+        lastWas = IS_LETTER;
+        break;
 
-    case IS_SYMBOL:
-      lastWas = IS_SYMBOL;
-      break;
+      case IS_NUMBER:
+        numStr[numPos++] = inputChar;
+        numStr[numPos] = '\0';
+        lastWas = IS_NUMBER;
+        break;
+
+      case IS_LINEBREAK:
+        if (lastWas == IS_SPACE) break;
+        lastWas = IS_LINEBREAK;
+
+      // Não há break no caso anterior, pois ambos os casos tem código
+      // semelhante que será reutilizado.
+      case IS_SPACE:
+        if (wordFirstLetter != IS_SPACE) textStr[textPos++] = wordFirstLetter;
+        wordFirstLetter = IS_SPACE;
+
+        if (wordSize) {
+          textStr[textPos++] = 'm';
+          for (char i = 0; i <= wordSize; i++) textStr[textPos++] = 'a';
+          textStr[textPos] = '\0';
+        }
+        if (lastWas == IS_LINEBREAK) {
+          if (lineSum == 1)
+            printf("1 goat says:%s\n", textStr);
+          else
+            printf("%d goats say:%s\n", lineSum, textStr);
+          textPos = 0, numPos = 0, lineSum = 0;
+          textStr[0] = '\0', numStr[0] = '\0';
+        }
+        wordSize = 0;
+        lastWas = IS_SPACE;
+        break;
+
+      case IS_SYMBOL:
+        lastWas = IS_SYMBOL;
+        break;
     }
   }
 }
@@ -121,11 +118,8 @@ int inputCases(char c, char isFirstLetter) {
     }
     return IS_LETTER;
   }
-  if ('0' <= c && c <= '9')
-    return IS_NUMBER;
-  if (c == ' ')
-    return IS_SPACE;
-  if (c == '\n')
-    return IS_LINEBREAK;
+  if ('0' <= c && c <= '9') return IS_NUMBER;
+  if (c == ' ') return IS_SPACE;
+  if (c == '\n') return IS_LINEBREAK;
   return IS_SYMBOL;
 }

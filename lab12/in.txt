@@ -1,6 +1,0 @@
-criar
-inserir 10, Felipe, 25.2
-inserir 80, Cassia, 0
-imprimir
-imprimir
-imprimir

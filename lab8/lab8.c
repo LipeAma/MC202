@@ -22,8 +22,7 @@ typedef struct Element {
 
 Set *newSet(void) {
   Set *set = (Set *)malloc(sizeof(Set));
-  if (set == NULL)
-    return NULL;
+  if (set == NULL) return NULL;
   set->firstDummy = (Element *)calloc(1, sizeof(Element));
   if (set->firstDummy == NULL) {
     free(set);
@@ -66,18 +65,15 @@ int containsVal(int val, Set *set) {
 void insertVal(int val, Set *set) {
   for (Element *element = set->firstDummy->next; element->next != NULL;
        element = element->next) {
-    if (element->val.num == val)
-      return;
+    if (element->val.num == val) return;
   }
 
   Element *element = (Element *)malloc(sizeof(Element));
-  if (element == NULL)
-    return;
+  if (element == NULL) return;
 
   Element *aux = set->firstDummy->next;
   while (aux->next != NULL) {
-    if (aux->val.num > val)
-      break;
+    if (aux->val.num > val) break;
     aux = aux->next;
   }
   element->val.num = val;
@@ -101,8 +97,7 @@ void removeVal(int val, Set *set) {
 }
 
 Set *actionC(Set *setOfSets, int newSetName) {
-  if (newSetName == -1)
-    scanf("%d", &newSetName);
+  if (newSetName == -1) scanf("%d", &newSetName);
   for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
        set = set->next) {
     if (set->val.set.name == newSetName) {
@@ -168,12 +163,9 @@ void actionU(Set *setOfSets) {
   Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
   for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
        set = set->next) {
-    if (set->val.set.name == nameB)
-      B = set->val.set.pointer;
-    if (set->val.set.name == nameC)
-      C = set->val.set.pointer;
-    if (B && C)
-      break;
+    if (set->val.set.name == nameB) B = set->val.set.pointer;
+    if (set->val.set.name == nameC) C = set->val.set.pointer;
+    if (B && C) break;
   }
 
   for (Element *element = B->firstDummy->next; element->next != NULL;
@@ -195,18 +187,14 @@ void actionN(Set *setOfSets) {
   Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
   for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
        set = set->next) {
-    if (set->val.set.name == nameB)
-      B = set->val.set.pointer;
-    if (set->val.set.name == nameC)
-      C = set->val.set.pointer;
-    if (B && C)
-      break;
+    if (set->val.set.name == nameB) B = set->val.set.pointer;
+    if (set->val.set.name == nameC) C = set->val.set.pointer;
+    if (B && C) break;
   }
 
   for (Element *element = B->firstDummy->next; element->next != NULL;
        element = element->next) {
-    if (containsVal(element->val.num, C))
-      insertVal(element->val.num, A);
+    if (containsVal(element->val.num, C)) insertVal(element->val.num, A);
   }
   return;
 }
@@ -218,18 +206,14 @@ void actionM(Set *setOfSets) {
   Set *A = actionC(setOfSets, nameA), *B = NULL, *C = NULL;
   for (Element *set = setOfSets->firstDummy->next; set->next != NULL;
        set = set->next) {
-    if (set->val.set.name == nameB)
-      B = set->val.set.pointer;
-    if (set->val.set.name == nameC)
-      C = set->val.set.pointer;
-    if (B && C)
-      break;
+    if (set->val.set.name == nameB) B = set->val.set.pointer;
+    if (set->val.set.name == nameC) C = set->val.set.pointer;
+    if (B && C) break;
   }
 
   for (Element *element = B->firstDummy->next; element->next != NULL;
        element = element->next) {
-    if (!containsVal(element->val.num, C))
-      insertVal(element->val.num, A);
+    if (!containsVal(element->val.num, C)) insertVal(element->val.num, A);
   }
   return;
 }
@@ -278,8 +262,7 @@ void actionP(Set *setOfSets) {
   while (element->next != NULL) {
     printf("%d", element->val.num);
     element = element->next;
-    if (element->next != NULL)
-      printf(", ");
+    if (element->next != NULL) printf(", ");
   }
   printf("}\n");
 }
@@ -296,35 +279,35 @@ int main(void) {
   char action;
   while (scanf("%c", &action) != EOF) {
     switch (action) {
-    case 'c':
-      actionC(setOfSets, -1);
-      break;
-    case 'i':
-      actionI(setOfSets);
-      break;
-    case 'r':
-      actionR(setOfSets);
-      break;
-    case 'u':
-      actionU(setOfSets);
-      break;
-    case 'n':
-      actionN(setOfSets);
-      break;
-    case 'm':
-      actionM(setOfSets);
-      break;
-    case 'e':
-      actionE(setOfSets);
-      break;
-    case 'p':
-      actionP(setOfSets);
-      break;
-    case 't':
-      actionT(setOfSets);
-      break;
-    default:
-      break;
+      case 'c':
+        actionC(setOfSets, -1);
+        break;
+      case 'i':
+        actionI(setOfSets);
+        break;
+      case 'r':
+        actionR(setOfSets);
+        break;
+      case 'u':
+        actionU(setOfSets);
+        break;
+      case 'n':
+        actionN(setOfSets);
+        break;
+      case 'm':
+        actionM(setOfSets);
+        break;
+      case 'e':
+        actionE(setOfSets);
+        break;
+      case 'p':
+        actionP(setOfSets);
+        break;
+      case 't':
+        actionT(setOfSets);
+        break;
+      default:
+        break;
     }
   }
 }

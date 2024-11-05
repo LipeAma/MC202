@@ -2,134 +2,110 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Tree {
-    char name[101];
-    float points;
-    int key;
-    struct Tree *left;
-    struct Tree *right;
-} Tree;
-
-Tree *scanTree(void) {
-    Tree *tree = malloc(sizeof(Tree));
-    if (tree == NULL) {
-        printf("memoria insuficiente");
-        return NULL;
-    }
-    scanf("%d", &tree->key);
-    scanf(", %100[^,]", tree->name);
-    scanf(", %f", &tree->points);
-    tree->left = tree->right = NULL;
-    return tree;
-}
-
-void insertTree(Tree **ptree, Tree *new) {
-    int key = new->key;
-    Tree *tree = *ptree;
-    while (1) {
-        if (key < tree->key) {
-            if (tree->left != NULL) {
-                tree = tree->left;
-                continue;
-            } else {
-                tree->left = new;
-                break;
-            }
-        } else if (key > tree->key) {
-            if (tree->right != NULL) {
-                tree = tree->right;
-                continue;
-            } else {
-                tree->right = new;
-                break;
-            }
-        } else if (key == tree->key) {
-            break;
-        }
-        break;
-    }
-    return;
-}
-
-void removeTree(Tree **ptree, int key) {
-    Tree *predecessor, *tree;
-    predecessor = tree = *ptree;
-    while (1) {
-        if (key < tree->key) {
-            if (tree->left == NULL)
-                break;
-            predecessor = tree;
-            tree = tree->left;
-            continue;
-        } else if (key > tree->key) {
-            if (tree->right == NULL)
-                break;
-            tree = tree->right;
-            continue;
-        } else if (key == tree->key) {
-            break;
-        }
-        break;
-    }
-    return;
-}
-
-void printTree(Tree *tree) {
-    if (tree->left != NULL)
-        printTree(tree->left);
-    printf("%s (%d) ", tree->name, tree->key);
-    if (tree->right != NULL)
-        printTree(tree->right);
-}
-
-// void freeTree(Tree **tree) {}
+#include "funcoes.h"
 
 int main(void) {
-    char command[17];
-    Tree *tree = NULL;
-    while (scanf(" %s", command) != EOF) {
-        if (strcmp(command, "criar") == 0) {
-            if (tree != NULL)
-                //freeTree(&tree);
-            continue;
-        }
-        if (strcmp(command, "inserir") == 0) {
-            Tree *new = scanTree();
-            if (tree == NULL) {
-                tree = new;
-            } else if (new != NULL){
-                insertTree(&tree, new);
-            }
-            continue;
-        }
-        if (strcmp(command, "remover") == 0) {
-            continue;
-        }
-        if (strcmp(command, "buscar") == 0) {
-            continue;
-        }
-        if (strcmp(command, "imprimir") == 0) {
-            if (tree != NULL)
-                printTree(tree);
-            continue;
-        }
-        if (strcmp(command, "minimo") == 0) {
-            continue;
-        }
-        if (strcmp(command, "maximo") == 0) {
-            continue;
-        }
-        if (strcmp(command, "sucessor") == 0) {
-            continue;
-        }
-        if (strcmp(command, "predecessor") == 0) {
-            continue;
-        }
-        if (strcmp(command, "buscar-intervalo") == 0) {
-            continue;
-        }
-        if (strcmp(command, "terminar") == 0) {
-            continue;
-        }  
+  Tree *tree = NULL;
+
+  float points;
+  char *name, command[17];
+  while (scanf(" %s", command) != EOF) {
+    if (strcmp(command, "criar") == 0) {
+      if (tree != NULL) freeTree(tree);
+      tree = newTree();
     }
+
+    else if (strcmp(command, "inserir") == 0) {
+      int key;
+      scanf("%d, ", &key);
+      name = calloc(101, sizeof(char));
+      scanf(" %100[^,] ", name);
+      scanf(" ,%f", &points);
+      insert(tree, key, name, points);
+    }
+
+    else if (strcmp(command, "remover") == 0) {
+      int key;
+      scanf("%d", &key);
+      removeNode(tree, key);
+    }
+
+    else if (strcmp(command, "imprimir") == 0) {
+      if (tree->root == NULL) {
+        printf("arvore vazia\n");
+      } else {
+        printTree(tree);
+      }
+
+    }
+
+    else if (strcmp(command, "buscar") == 0) {
+      int key;
+      scanf("%d", &key);
+      Node *node = getNode(tree, key);
+      if (node == NULL)
+        printf("nao ha cliente %d\n", key);
+      else
+        printf("cliente %d: %s, %.2f pontos\n", node->key, node->name,
+               node->points);
+    }
+
+    else if (strcmp(command, "minimo") == 0) {
+      if (tree->root == NULL) {
+        printf("arvore vazia\n");
+      } else {
+        printf("minimo: %d\n", treeMin(tree));
+      }
+    } else if (strcmp(command, "maximo") == 0) {
+      if (tree->root == NULL) {
+        printf("arvore vazia\n");
+      } else {
+        printf("maximo: %d\n", treeMax(tree));
+      }
+    }
+
+    else if (strcmp(command, "sucessor") == 0) {
+      int key;
+      int error;
+      scanf("%d", &key);
+      int result = getNextNode(tree->root, key, &error);
+      if (error == -1) {
+        printf("nao ha cliente %d\n", key);
+      } else if (error == 1) {
+        printf("sucessor de %d: nao ha\n", key);
+      } else {
+        printf("sucessor de %d: %d\n", key, result);
+      }
+    }
+
+    else if (strcmp(command, "predecessor") == 0) {
+      int key;
+      int error;
+      scanf("%d", &key);
+      int result = getPrevNode(tree->root, key, &error);
+      if (error == -1) {
+        printf("nao ha cliente %d\n", key);
+      } else if (error == 1) {
+        printf("predecessor de %d: nao ha\n", key);
+      } else {
+        printf("predecessor de %d: %d\n", key, result);
+      }
+    }
+
+    else if (strcmp(command, "buscar-intervalo") == 0) {
+      int a, b;
+      scanf("%d", &a);
+      scanf("%d", &b);
+      printf("clientes no intervalo [%d,%d]: ", a, b);
+      if (getRange(tree, a, b) == 0) {
+        printf("nenhum");
+      }
+      printf("\n");
+    }
+
+    else if (strcmp(command, "terminar") == 0) {
+      if (tree != NULL) freeTree(tree);
+      break;
+    }
+  }
 }

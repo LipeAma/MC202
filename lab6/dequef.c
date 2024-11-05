@@ -1,4 +1,5 @@
 #include "dequef.h"
+
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
@@ -19,8 +20,7 @@ dequef *df_alloc(long capacity, double resizeFactor) {
     return NULL;
 
   dequef *deque = malloc(sizeof(dequef));
-  if (deque == NULL)
-    return NULL;
+  if (deque == NULL) return NULL;
 
   deque->size = 0;
   deque->first = 0;
@@ -60,10 +60,8 @@ Falha -> 0
 **/
 int df_upscale(dequef *deque) {
   if (deque->cap == deque->size) {
-
     long novaCapacidade = deque->cap * deque->factor;
-    if (novaCapacidade == deque->cap)
-      return 0;
+    if (novaCapacidade == deque->cap) return 0;
 
     float *arrayFloat = realloc(deque->data, novaCapacidade * sizeof(float));
 
@@ -76,7 +74,8 @@ int df_upscale(dequef *deque) {
     Arrumado :         c d e _ _ _ _ _ _ _ _ a b
 
     Dada a implementação, se não houver espaços vazios entre os valores eles
-    serão deslocadas para o final, mesmo que isso seja desnecessário. Exemplo:
+    serão deslocadas para o final, mesmo que isso seja desnecessário.
+    Exemplo:
 
     Antes:             a b c d e _ _ _
     Logo após aumento: a b c d e _ _ _ _ _ _ _ _
@@ -103,23 +102,18 @@ Falha -> 0
 **/
 int df_downscale(dequef *deque) {
   if (deque->cap / pow(deque->factor, 2.0) >= deque->size) {
-
     long novaCapacidade = deque->cap / deque->factor;
-    if (novaCapacidade == deque->cap)
-      return 0;
-    if (novaCapacidade < deque->mincap)
-      novaCapacidade = deque->mincap;
+    if (novaCapacidade == deque->cap) return 0;
+    if (novaCapacidade < deque->mincap) novaCapacidade = deque->mincap;
 
     float *aux = malloc(novaCapacidade * sizeof(float));
 
-    if (aux == NULL)
-      return 0;
+    if (aux == NULL) return 0;
 
     long pos;
     for (long i = 0; i < deque->size; i++) {
       pos = deque->first + i;
-      if (pos >= deque->cap)
-        pos -= deque->cap;
+      if (pos >= deque->cap) pos -= deque->cap;
       aux[i] = deque->data[pos];
     }
 
@@ -141,13 +135,10 @@ Sucesso -> 1
 Falha -> 0
 **/
 int df_push(dequef *deque, float valor) {
-
-  if (df_upscale(deque) == 0)
-    return 0;
+  if (df_upscale(deque) == 0) return 0;
 
   long insertPosition = deque->first + deque->size;
-  if (insertPosition >= deque->cap)
-    insertPosition -= deque->cap;
+  if (insertPosition >= deque->cap) insertPosition -= deque->cap;
 
   deque->data[insertPosition] = valor;
   deque->size += 1;
@@ -163,18 +154,14 @@ Sucesso -> Valor removido
 Falha -> 0
 **/
 float df_pop(dequef *deque) {
-
-  if (deque->size == 0)
-    return 0.0f;
+  if (deque->size == 0) return 0.0f;
 
   long popPosition = deque->first + deque->size - 1;
-  if (popPosition >= deque->cap)
-    popPosition -= deque->cap;
+  if (popPosition >= deque->cap) popPosition -= deque->cap;
 
   float returnValue = deque->data[popPosition];
   deque->size -= 1;
-  if (df_downscale(deque) == 0)
-    return 0;
+  if (df_downscale(deque) == 0) return 0;
 
   return returnValue;
 }
@@ -187,13 +174,10 @@ Sucesso -> 1
 Falha -> 0
 **/
 int df_inject(dequef *deque, float valor) {
-
-  if (df_upscale(deque) == 0)
-    return 0;
+  if (df_upscale(deque) == 0) return 0;
 
   long insertPosition = deque->first - 1;
-  if (insertPosition == -1)
-    insertPosition += deque->cap;
+  if (insertPosition == -1) insertPosition += deque->cap;
 
   deque->data[insertPosition] = valor;
   deque->size += 1;
@@ -210,18 +194,14 @@ Sucesso -> Valor removido
 Falha -> 0
 **/
 float df_eject(dequef *deque) {
-
-  if (deque->size == 0)
-    return 0.0f;
+  if (deque->size == 0) return 0.0f;
 
   float returnValue = deque->data[deque->first];
   deque->first += 1;
   deque->size -= 1;
-  if (deque->first >= deque->cap)
-    deque->first = 0;
+  if (deque->first >= deque->cap) deque->first = 0;
 
-  if (df_downscale(deque) == 0)
-    return 0.0f;
+  if (df_downscale(deque) == 0) return 0.0f;
 
   return returnValue;
 }
@@ -233,14 +213,12 @@ Sucesso -> Valor removido
 Falha -> 0
 **/
 float df_get(dequef *deque, long posicao) {
-
   if (posicao < 0 || posicao >= deque->size) {
     errno = 33;
     return 0.0f;
   } else {
     long getPosition = deque->first + posicao;
-    if (getPosition >= deque->cap)
-      getPosition -= deque->cap;
+    if (getPosition >= deque->cap) getPosition -= deque->cap;
     return deque->data[getPosition];
   }
 }
@@ -251,8 +229,7 @@ Modifica a posição especificada para o valor especificado.
 void df_set(dequef *deque, long posicao, float valor) {
   if (posicao >= 0 && posicao < deque->size) {
     long setPosition = deque->first + posicao;
-    if (setPosition >= deque->cap)
-      setPosition -= deque->cap;
+    if (setPosition >= deque->cap) setPosition -= deque->cap;
     deque->data[setPosition] = valor;
   } else {
     errno = 33;
@@ -289,11 +266,9 @@ void df_printArray(dequef *deque) {
     if (deque->first + deque->size >= deque->cap) {
       long numOfElements = deque->first + deque->size - deque->cap;
       blanksBeforeFirst -= numOfElements;
-      for (int i = 0; i < numOfElements; i++)
-        printf(" %.1f", deque->data[i]);
+      for (int i = 0; i < numOfElements; i++) printf(" %.1f", deque->data[i]);
     }
-    for (int i = 0; i < blanksBeforeFirst; i++)
-      printf(" _");
+    for (int i = 0; i < blanksBeforeFirst; i++) printf(" _");
     for (int i = deque->first; i < deque->cap; i++) {
       if (i >= deque->first + deque->size)
         printf(" _");

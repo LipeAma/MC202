@@ -32,8 +32,7 @@ void listInsert(ChainList *list) {
     fprintf(stderr, "Comando faltando argumentos.");
     exit(1);
   }
-  if (position > list->lenght)
-    position = list->lenght;
+  if (position > list->lenght) position = list->lenght;
 
   auxiliar = (Node *)malloc(sizeof(Node));
   if (auxiliar == NULL) {
@@ -47,8 +46,7 @@ void listInsert(ChainList *list) {
     auxiliar->next = current;
     list->head = auxiliar;
   } else {
-    for (unsigned long i = 1; i < position; i++)
-      current = current->next;
+    for (unsigned long i = 1; i < position; i++) current = current->next;
     auxiliar->next = current->next;
     current->next = auxiliar;
   }
@@ -66,16 +64,14 @@ void listRemove(ChainList *list) {
     fprintf(stderr, "Comando faltando argumentos.");
     exit(1);
   }
-  if (position >= list->lenght)
-    return;
+  if (position >= list->lenght) return;
 
   current = list->head;
   if (position == 0) {
     list->head = current->next;
     free(current);
   } else {
-    for (unsigned long i = 1; i < position; i++)
-      current = current->next;
+    for (unsigned long i = 1; i < position; i++) current = current->next;
     removed = current->next;
     current->next = removed->next;
     free(removed);
@@ -108,8 +104,7 @@ void listReverse(ChainList *list) {
     exit(1);
   }
 
-  if (start >= end || end >= list->lenght)
-    return;
+  if (start >= end || end >= list->lenght) return;
 
   // Passo 1:
   current = list->head;
@@ -126,8 +121,8 @@ void listReverse(ChainList *list) {
   // nextNode1 aponta para o sucessor de currentNode.
 
   // Passo 2:
-  // currentNode percorrerá de X_{pos1} até X_{pos2-1} a cada iteração fará seu
-  // sucessor apontar para ele.
+  // currentNode percorrerá de X_{pos1} até X_{pos2-1} a cada iteração fará
+  // seu sucessor apontar para ele.
   for (unsigned long i = start; i < end; i++) {
     next2 = next1->next;
     next1->next = current;
@@ -168,12 +163,9 @@ void listMove(ChainList *list) {
   auxiliar = list->head;
   unsigned long range = (end < position) ? position : end + 1;
   for (unsigned long i = 1; i <= range; i++) {
-    if (i == start)
-      beforeStart = auxiliar;
-    if (i == end + 1)
-      atEnd = auxiliar;
-    if (i == position)
-      beforePosition = auxiliar;
+    if (i == start) beforeStart = auxiliar;
+    if (i == end + 1) atEnd = auxiliar;
+    if (i == position) beforePosition = auxiliar;
     auxiliar = auxiliar->next;
   }
 
@@ -211,30 +203,28 @@ int main(void) {
 
   while (scanf("%c", &command) != EOF) {
     switch (command) {
-    case 'c':
-      if (list != NULL)
-        listFree(list);
-      list = listNew();
-      break;
-    case 'i':
-      listInsert(list);
-      break;
-    case 'r':
-      listRemove(list);
-      break;
-    case 'p':
-      listPrint(list);
-      break;
-    case 'v':
-      listReverse(list);
-      break;
-    case 'x':
-      listMove(list);
-      break;
-    case 't':
-      if (list != NULL)
-        listFree(list);
-      break;
+      case 'c':
+        if (list != NULL) listFree(list);
+        list = listNew();
+        break;
+      case 'i':
+        listInsert(list);
+        break;
+      case 'r':
+        listRemove(list);
+        break;
+      case 'p':
+        listPrint(list);
+        break;
+      case 'v':
+        listReverse(list);
+        break;
+      case 'x':
+        listMove(list);
+        break;
+      case 't':
+        if (list != NULL) listFree(list);
+        break;
     }
   }
   return 0;
