@@ -20,6 +20,7 @@ terminar, toda memória deve ser liberada.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 typedef struct {
   unsigned key;
@@ -28,12 +29,36 @@ typedef struct {
 
 typedef struct {
   Pair *pairs;
-  unsigned *index;
+  unsigned *index, capacity, size;
 } Heap;
 
-void heapFree(Heap *);
-Heap *heapNew(unsigned);
-void heapInsert(Heap *, unsigned, int);
+void heapFree(Heap *heap){
+  free(heap->pairs);
+  free(heap->index);    
+  free(heap);
+}
+
+Heap *heapNew(unsigned capacity){
+  if (capacity == UINT_MAX) return NULL;
+  Heap *heap = malloc(sizeof(Heap));
+  heap->pairs = malloc(sizeof(Pair)*capacity);
+  heap->index = malloc(sizeof(unsigned)*capacity);
+  for (unsigned i = 0; i < capacity; i++)
+    heap->index[i] = UINT_MAX;
+  heap->capacity = capacity;
+  heap->size = 0;
+  return heap;
+}
+
+void heapInsert(Heap *heap, unsigned key, int cost){
+  if (heap->index[key] != UINT_MAX) return;
+  unsigned i = heap->size;
+  Pair *pair = &heap->pairs[i];
+  pair->cost = cost;
+  pair->key = key;
+  while (heap->pairs[(i-1)/2])
+}
+
 Pair *heapRemove(Heap *);
 void heapDecrease(Heap *, unsigned, int);
 
