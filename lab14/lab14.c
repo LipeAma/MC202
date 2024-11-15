@@ -54,9 +54,10 @@ void heapInsert(Heap *heap, unsigned key, int cost){
   if (heap->index[key] != UINT_MAX) return;
   unsigned i = heap->size;
   Pair *pair = &heap->pairs[i];
-  pair->cost = cost;
-  pair->key = key;
-  while (heap->pairs[(i-1)/2])
+  pa
+  while (heap->pairs[(i-1)/2]){
+    ;
+  }
 }
 
 Pair *heapRemove(Heap *);
